@@ -11,10 +11,20 @@ pub enum OutputTypes {
 #[derive(Debug, Parser)]
 #[command(author, version, about, long_about = None)]
 pub struct Args {
-    #[arg(short = 'k', long, default_value_t = false)]
+    #[arg(
+        short = 'k',
+        long,
+        default_value_t = false,
+        help = "Exit with 0 even when no URLs are found"
+    )]
     pub ok: bool,
 
-    #[arg(short, long, default_value_t = false)]
+    #[arg(
+        short,
+        long,
+        default_value_t = false,
+        help = "Copy first URL to clipboard"
+    )]
     pub clip: bool,
 
     #[arg(short = 'o', long, value_enum, default_value_t = OutputTypes::First)]
