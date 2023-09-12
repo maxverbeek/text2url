@@ -1,47 +1,52 @@
+mod args;
+mod errors;
+
 use is_url::is_url;
 use std::io::BufRead;
 
 use cli_clipboard::{ClipboardContext, ClipboardProvider};
 
-use thiserror::Error;
+use errors::TextToUrlErrors as E;
 
-#[derive(Error, Debug)]
-enum TextToUrlErrors {
-    #[error("IO error")]
-    IO(#[from] std::io::Error),
+type Res = Result<(), E>;
 
-    #[error("failed to initialise clipboard provider")]
-    ClipboardContext,
+fn main() -> Res {
+    println!("{}", E::ClipboardContext);
 
-    #[error("set clipboard")]
-    SetClipboardContent,
-}
+    let args = args::parse()?;
 
-fn main() -> Result<(), TextToUrlErrors> {
     let lines: Vec<String> = std::io::stdin()
         .lock()
         .lines()
         .collect::<std::io::Result<Vec<_>>>()
-        .map_err(|e| TextToUrlErrors::IO(e))?;
+        .map_err(|e| E::IO(e))?;
 
-    let first_url = lines
+    let mut urls = lines
         .iter()
         .flat_map(|l| l.split_whitespace())
-        .find(|w| is_url(w));
+        .filter(|w| is_url(w))
+        .peekable();
 
-    if let Some(url) = first_url {
-        set_clipboard(url)?
+    if !args.ok && urls.peek().is_none() {
+        std::process::exit(1)
     }
 
-    // TODO: return 1 optionally, implement flags for this
+    if args.clip {
+        return set_clipboard(urls.next().expect("asserted is_none earlier"));
+    }
+
+    for url in urls {
+        println!("{}", url);
+    }
+
     Ok(())
 }
 
-fn set_clipboard(url: &str) -> Result<(), TextToUrlErrors> {
-    let mut ctx = ClipboardContext::new().map_err(|_| TextToUrlErrors::ClipboardContext)?;
+fn set_clipboard(url: &str) -> Res {
+    let mut ctx = ClipboardContext::new().map_err(|_| E::ClipboardContext)?;
 
     ctx.set_contents(url.to_owned())
-        .map_err(|_| TextToUrlErrors::SetClipboardContent)?;
+        .map_err(|_| E::SetClipboardContent)?;
 
     Ok(())
 }
