@@ -2,7 +2,7 @@ mod args;
 mod errors;
 
 use is_url::is_url;
-use std::io::BufRead;
+use std::{io::BufRead, process::exit};
 
 use cli_clipboard::{ClipboardContext, ClipboardProvider};
 
@@ -26,15 +26,21 @@ fn main() -> Res {
         .peekable();
 
     if !args.ok && urls.peek().is_none() {
-        std::process::exit(1)
+        exit(1)
     }
 
-    if args.clip {
-        return set_clipboard(urls.next().expect("asserted is_none earlier"));
+    if let Some(url) = urls.peek() {
+        if args.clip {
+            set_clipboard(url)?;
+        }
     }
 
-    for url in urls {
-        println!("{}", url);
+    match args.out {
+        args::OutputTypes::First => urls.take(1).for_each(|u| println!("{}", u)),
+        args::OutputTypes::Lines => urls.for_each(|u| println!("{}", u)),
+        args::OutputTypes::Tee => {
+            lines.iter().for_each(|l| println!("{}", l));
+        }
     }
 
     Ok(())

@@ -4,8 +4,9 @@ use crate::errors::TextToUrlErrors;
 
 #[derive(ValueEnum, Debug, Clone, PartialEq, Eq)]
 pub enum OutputTypes {
-    Lines,
     First,
+    Lines,
+    Tee,
 }
 
 #[derive(Debug, Parser)]
