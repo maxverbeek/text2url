@@ -52,12 +52,12 @@ fn set_clipboard(url: &str) -> Res {
         .args(["-selection", "clipboard", "-in"])
         .stdin(Stdio::piped())
         .spawn()
-        .map_err(|e| E::SetClipboardContent(e))?;
+        .map_err(|e| E::SetClipboardSpawn(e))?;
 
     let child_stdin = proc.stdin.as_mut().unwrap();
     child_stdin
         .write_fmt(format_args!("{}", url))
-        .map_err(|e| E::SetClipboardContent(e))?;
+        .map_err(|e| E::SetClipboardPipe(e))?;
 
     proc.wait()?;
 

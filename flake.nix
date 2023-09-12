@@ -26,7 +26,10 @@
         craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
         src = craneLib.cleanCargoSource (craneLib.path ./.);
 
-        commonArgs = { inherit src; };
+        commonArgs = {
+          inherit src;
+          nativeBuildInputs = [ pkgs.xclip ];
+        };
 
         cargoArtifacts = craneLib.buildDepsOnly commonArgs;
 

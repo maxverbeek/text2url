@@ -5,11 +5,11 @@ pub enum TextToUrlErrors {
     #[error("IO error")]
     IO(#[from] std::io::Error),
 
-    #[error("failed to initialise clipboard provider")]
-    ClipboardContext,
+    #[error("spawning set clipboard process")]
+    SetClipboardSpawn(std::io::Error),
 
-    #[error("set clipboard")]
-    SetClipboardContent(std::io::Error),
+    #[error("writing stdin to set clipboard process")]
+    SetClipboardPipe(std::io::Error),
 
     #[error("incompatible args: {0}")]
     ArgsIncompatible(String),
