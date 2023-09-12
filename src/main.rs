@@ -11,8 +11,6 @@ use errors::TextToUrlErrors as E;
 type Res = Result<(), E>;
 
 fn main() -> Res {
-    println!("{}", E::ClipboardContext);
-
     let args = args::parse()?;
 
     let lines: Vec<String> = std::io::stdin()
