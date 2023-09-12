@@ -9,7 +9,7 @@ pub enum TextToUrlErrors {
     ClipboardContext,
 
     #[error("set clipboard")]
-    SetClipboardContent,
+    SetClipboardContent(std::io::Error),
 
     #[error("incompatible args: {0}")]
     ArgsIncompatible(String),

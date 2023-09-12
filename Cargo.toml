@@ -7,6 +7,5 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.4.2", features = ["derive"] }
-cli-clipboard = "0.4.0"
 is-url = "1.0.4"
 thiserror = "1.0.48"

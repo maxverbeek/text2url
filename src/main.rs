@@ -2,9 +2,10 @@ mod args;
 mod errors;
 
 use is_url::is_url;
-use std::{io::BufRead, process::exit};
-
-use cli_clipboard::{ClipboardContext, ClipboardProvider};
+use std::{
+    io::{BufRead, Write},
+    process::{exit, Command, Stdio},
+};
 
 use errors::TextToUrlErrors as E;
 
@@ -25,7 +26,7 @@ fn main() -> Res {
         .filter(|w| is_url(w))
         .peekable();
 
-    if !args.ok && urls.peek().is_none() {
+    if !args.ok && args.out != args::OutputTypes::Tee && urls.peek().is_none() {
         exit(1)
     }
 
@@ -47,10 +48,28 @@ fn main() -> Res {
 }
 
 fn set_clipboard(url: &str) -> Res {
-    let mut ctx = ClipboardContext::new().map_err(|_| E::ClipboardContext)?;
+    let mut proc = Command::new("xclip")
+        .args(["-selection", "clipboard", "-in"])
+        .stdin(Stdio::piped())
+        .spawn()
+        .map_err(|e| E::SetClipboardContent(e))?;
 
-    ctx.set_contents(url.to_owned())
-        .map_err(|_| E::SetClipboardContent)?;
+    let child_stdin = proc.stdin.as_mut().unwrap();
+    child_stdin
+        .write_fmt(format_args!("{}", url))
+        .map_err(|e| E::SetClipboardContent(e))?;
+
+    proc.wait()?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::set_clipboard;
+
+    #[test]
+    fn test_clipboard() {
+        set_clipboard("testing").unwrap();
+    }
 }

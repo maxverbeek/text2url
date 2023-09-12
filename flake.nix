@@ -25,12 +25,19 @@
 
         craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
         src = craneLib.cleanCargoSource (craneLib.path ./.);
-        text2url = craneLib.buildPackage { inherit src; };
+
+        commonArgs = { inherit src; };
+
+        cargoArtifacts = craneLib.buildDepsOnly commonArgs;
+
+        text2url = craneLib.buildPackage commonArgs // {
+          inherit cargoArtifacts;
+        };
 
       in {
         checks = { inherit text2url; };
 
-        devShells.default = craneLib.devShell {
+        devShells.default = craneLib.devShell commonArgs // {
           name = "devshell";
           checks = self.checks.${system};
         };
