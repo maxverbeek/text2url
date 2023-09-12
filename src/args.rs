@@ -34,11 +34,13 @@ pub struct Args {
 pub fn parse() -> Result<Args, TextToUrlErrors> {
     let args = Args::parse();
 
-    if args.clip && args.out != OutputTypes::First {
-        Err(TextToUrlErrors::ArgsIncompatible(
-            "cannot use --clip when not selecting the first match".into(),
-        ))
-    } else {
-        Ok(args)
-    }
+    // if args.clip && args.out != OutputTypes::First {
+    //     Err(TextToUrlErrors::ArgsIncompatible(
+    //         "cannot use --clip when not selecting the first match".into(),
+    //     ))
+    // } else {
+    //     Ok(args)
+    // }
+
+    Ok(args)
 }
